@@ -7,8 +7,12 @@ from fastapi import Request, HTTPException
 
 def get_current_user(request: Request) -> Optional[str]:
     """Get current username from request state (set by auth middleware)."""
-    return getattr(request.state, 'current_user', None)
-
+    user = getattr(request.state, 'current_user', None)
+    if user is None:
+        import os
+        if os.getenv("AUTH_ENABLED", "true").lower() == "false":
+            return "admin"
+    return user
 
 def effective_user(request: Request) -> Optional[str]:
     """The real human behind the request, for ownership/attribution.
